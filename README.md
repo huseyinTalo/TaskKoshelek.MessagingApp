@@ -70,6 +70,7 @@ This application follows a service-oriented architecture with two main services:
    - **UI:** [http://localhost:9090](http://localhost:9090)
    - **API:** [http://localhost:9098](http://localhost:9098)
    - **Swagger Documentation:** [http://localhost:9098/swagger](http://localhost:9098/swagger)
+   - **DB Credentials:** Server Name: localhost, 7070 - Login: SA - Password: Strong_Password123!
 
 ---
 
