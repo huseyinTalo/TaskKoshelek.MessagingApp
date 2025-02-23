@@ -57,7 +57,7 @@ This application follows a service-oriented architecture with two main services:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/TaskKoshelek.MessagingApp.git
+   git clone https://github.com/huseyinTalo/TaskKoshelek.MessagingApp.git
    cd TaskKoshelek.MessagingApp
    ```
 
