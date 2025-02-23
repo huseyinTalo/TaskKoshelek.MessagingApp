@@ -66,11 +66,11 @@ This application follows a service-oriented architecture with two main services:
    docker-compose up --build
    ```
 
-3. **Access the applications:**
+3. **Access the applications:(Once the container is up)**
    - **UI:** [http://localhost:9090](http://localhost:9090)
    - **API:** [http://localhost:9098](http://localhost:9098)
    - **Swagger Documentation:** [http://localhost:9098/swagger](http://localhost:9098/swagger)
-   - **DB Credentials:** Server Name: localhost, 7070 - Login: SA - Password: Strong_Password123!
+   - **DB Credentials for MS SQL Server connection:** Server Name: localhost, 7070 - Login: SA - Password: Strong_Password123!
 
 ---
 
