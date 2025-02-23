@@ -1,0 +1,108 @@
+﻿@model TaskKoshelek.MessagingApp.UI.Models.MessageVMs.MessageViewModel
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Mesaj Gönder</h3>
+            <form id="messageForm">
+                <div class="form-group">
+                    <label for="messageBody">Mesaj</label>
+                    <textarea id="messageBody" class="form-control" maxlength="128" required></textarea>
+                </div>
+                <input type="hidden" id="orderNumber" value="1" />
+                <button type="submit" class="btn btn-primary mt-2">Gönder</button>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <h3>Son Mesajlar</h3>
+            <div id="messageList" class="list-group">
+                <!-- Messages will be added here dynamically -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let orderNumber = 0;
+
+        // SignalR connection
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/messageHub")
+            .build();
+
+        connection.start().catch(err => console.error(err));
+
+        // When new message arrives
+        connection.on("ReceiveMessage", function (message) {
+            addMessageToList(message);
+        });
+
+                // Function to get the latest order number
+        function fetchLatestOrderNumber() {
+            return $.get('/Home/GetLatestOrderNumber')
+                .then(response => {
+                    return parseInt(response.latestOrderNumber) + 1;
+                })
+                .catch(err => {
+                    console.error('Failed to fetch latest order number:', err);
+                    return 1; // Default to 1 if fetching fails
+                });
+        }
+
+        // Sending message logic
+        $("#messageForm").submit(function (e) {
+            e.preventDefault();
+
+            const submitButton = $(this).find('button[type="submit"]');
+            submitButton.prop('disabled', true); // This is the way
+
+            fetchLatestOrderNumber().then(updatedOrderNumber => {
+                const message = {
+                    body: $("#messageBody").val(),
+                    orderNumber: updatedOrderNumber // Use the correct order number from the server
+                };
+
+                return $.ajax({
+                    url: '/Home/SendMessage',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(message)
+                });
+            })
+            .then(() => {
+                $("#messageBody").val(''); // Clear input after success
+                submitButton.prop('disabled', false); // Reenable the button
+            })
+            .catch(error => {
+                console.error('Hata:', error);
+            });
+        });
+
+
+        // Update messages periodically
+        function updateMessages() {
+            $.get('/Home/GetRecentMessages', function (messages) {
+                $("#messageList").empty();
+                messages.forEach(addMessageToList);
+            });
+        }
+
+        function addMessageToList(message) {
+            const messageElement = `
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between">
+                        <small>${new Date(message.createdTime).toLocaleString()}</small>
+                        <small>Sıra: ${message.orderNumber}</small>
+                    </div>
+                    <p class="mb-1">${message.body}</p>
+                </div>
+            `;
+            $("#messageList").prepend(messageElement);
+        }
+
+        // İlk yükleme ve periyodik güncelleme
+        updateMessages();
+        setInterval(updateMessages, 5000);
+    </script>
+}

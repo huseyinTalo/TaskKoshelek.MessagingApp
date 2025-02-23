@@ -1,0 +1,49 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Strong_Password123!
+      - MSSQL_PID=Developer
+      - MSSQL_TCP_PORT=7070
+    ports:
+      - "7070:7070"
+    volumes:
+      - sqldata:/var/opt/mssql
+  
+  init-db:
+    build:
+      context: .
+      dockerfile: TaskKoshelek.MessagingApp.DAL/Scripts/Dockerfile.init
+    depends_on:
+      - sqlserver  
+  api:
+    build:
+      context: .
+      dockerfile: TaskKoshelek.MessagingApp.API/Scripts/Dockerfile
+    ports:
+      - "9098:9098"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DB_CONNECTION_STRING=Server=sqlserver,7070;Database=TaskKoshelek.MessagingApp.DB;User Id=SA;Password=Strong_Password123!;TrustServerCertificate=True
+      - ConnectionStrings__MessageDatabase=Server=sqlserver,7070;Database=TaskKoshelek.MessagingApp.DB;User Id=SA;Password=Strong_Password123!;TrustServerCertificate=True
+      - ConnectionStrings__TelemetryDatabase=Server=sqlserver,7070;Database=MessagingAppTelemetry;User Id=SA;Password=Strong_Password123!;TrustServerCertificate=True
+    depends_on:
+      - sqlserver
+      - init-db
+  
+  ui:
+    build:
+      context: .
+      dockerfile: TaskKoshelek.MessagingApp.UI/Scripts/Dockerfile.UI
+    ports:
+      - "9090:9090"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - sqlserver
+      - init-db
+      - api
+
+volumes:
+  sqldata:

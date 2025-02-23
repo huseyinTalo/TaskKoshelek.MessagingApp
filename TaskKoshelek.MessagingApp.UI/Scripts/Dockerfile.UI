@@ -1,0 +1,17 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY TaskKoshelek.MessagingApp.UI/*.csproj ./TaskKoshelek.MessagingApp.UI/
+RUN dotnet restore "TaskKoshelek.MessagingApp.UI/TaskKoshelek.MessagingApp.UI.csproj"
+COPY . .
+RUN dotnet build "TaskKoshelek.MessagingApp.UI/TaskKoshelek.MessagingApp.UI.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "TaskKoshelek.MessagingApp.UI/TaskKoshelek.MessagingApp.UI.csproj" -c Release -o /app/publish
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENV ASPNETCORE_ENVIRONMENT=Development
+ENV ASPNETCORE_HTTP_PORTS=9090
+EXPOSE 9090
+ENTRYPOINT ["dotnet", "TaskKoshelek.MessagingApp.UI.dll"]

@@ -1,0 +1,10 @@
+﻿FROM mcr.microsoft.com/mssql-tools
+WORKDIR /app
+COPY TaskKoshelek.MessagingApp.DAL/Scripts/initDB.sql .
+COPY TaskKoshelek.MessagingApp.DAL/Scripts/TelemetryDBinit.sql .
+RUN echo '#!/bin/bash \n\
+    sleep 20 && \
+    /opt/mssql-tools/bin/sqlcmd -S sqlserver,7070 -U SA -P Strong_Password123! -i initDB.sql && \
+    /opt/mssql-tools/bin/sqlcmd -S sqlserver,7070 -U SA -P Strong_Password123! -i TelemetryDBinit.sql' > /app/init.sh \
+    && chmod +x /app/init.sh
+CMD ["/app/init.sh"]
